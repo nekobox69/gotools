@@ -99,11 +99,9 @@ Go Tools
 					},
 					&cli.StringFlag{
 						Name:        "host",
-						Aliases:     []string{"h"},
 						Usage:       "127.0.0.1:3306",
 						Destination: &host,
 						Value:       "127.0.0.1:3306",
-						Required:    true,
 					},
 					&cli.StringFlag{
 						Name:        "user",
@@ -111,7 +109,6 @@ Go Tools
 						Usage:       "root",
 						Destination: &user,
 						Value:       "root",
-						Required:    true,
 					},
 					&cli.StringFlag{
 						Name:        "password",
