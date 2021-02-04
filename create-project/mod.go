@@ -9,14 +9,14 @@ import (
 	"github.com/fatih/color"
 )
 
-const mod = `
-module {{.Project}}
+const mod = `module {{.Project}}
 
 go 1.14
 
 require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-xorm/xorm v0.7.9
+	github.com/nekobox69/pocket v0.0.0-20210202124852-35d3e9068639
 	github.com/nekobox69/zephyr v0.0.0-20210128112727-f084f96824ae
 	github.com/sirupsen/logrus v1.7.0
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776

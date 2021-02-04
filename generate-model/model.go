@@ -19,9 +19,9 @@ const (
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"json"
 
 	"{{.Pkg}}/internal"
 
@@ -308,8 +308,9 @@ func model(engine *xorm.Engine, pkg, path string) error {
 		structDefine := fmt.Sprintf("type %s struct {\n", structName)
 		structRow := ""
 		for _, c := range v.Columns() {
-			structRow += fmt.Sprintf("	%s		%s		`json:%s db:%s`\n",
-				sqlParamToGoParam(c.Name), sqlTypeToGoType(c.SQLType.Name), fmt.Sprintf("\"%s\"", c.Name), fmt.Sprintf("\"%s\"", c.Name))
+			structRow += fmt.Sprintf("	%s		%s		`json:%s db:%s` // %s\n",
+				sqlParamToGoParam(c.Name), sqlTypeToGoType(c.SQLType.Name), fmt.Sprintf("\"%s\"", c.Name),
+				fmt.Sprintf("\"%s\"", c.Name), c.Comment)
 		}
 		structRow += "}"
 		tpl := DBTpl{
