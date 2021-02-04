@@ -324,7 +324,7 @@ func model(engine *xorm.Engine, pkg, path string) error {
 			StructName:   structName,
 			CreateTime:   time.Now().Format(timeLayout),
 		}
-		err = dbSaveToFile(path+fileName, tpl)
+		err = dbSaveToFile(path+"/"+fileName, tpl)
 		color.Blue("结束生成表%s对应的model", v.Name)
 		if nil != err {
 			return err
