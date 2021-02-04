@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	// ignore
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 )
 
