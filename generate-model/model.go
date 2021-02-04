@@ -257,7 +257,7 @@ func ({{.Idx}} {{.StructName}}) GetList(engine *xorm.Engine, where string, where
 	}
 	count, err := session.FindAndCount(list)
 	if nil != err {
-		core.Logger.Error(err)
+		internal.Logger.Error(err)
 		return nil, count, err
 	}
 
