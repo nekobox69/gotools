@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	code = `
-// Package dto Create at {{.CreateTime}}
+	code = `// Package dto Create at {{.CreateTime}}
 package dto
 
 import (

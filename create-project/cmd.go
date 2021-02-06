@@ -13,8 +13,7 @@ import (
 
 const (
 	timeLayout = "2006-01-02 15:04:05"
-	configYaml = `
-port: 4000
+	configYaml = `port: 4000
 log_level: "debug"
 db:
   data_source: "root:123456@tcp(localhost:3306)/{{.DB}}"
@@ -22,8 +21,7 @@ db:
   max_idle_con: 5
   driver_name: "mysql"
 `
-	mainGO = `
-// Package main Create at {{.CreateTime}}
+	mainGO = `// Package main Create at {{.CreateTime}}
 package main
 
 import (

@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	serverGo = `
-// Package internal Create at {{.CreateTime}}
+	serverGo = `// Package internal Create at {{.CreateTime}}
 package internal
 
 import (
@@ -81,8 +80,7 @@ func GetPort() int {
 	return server.Config.Port
 }
 `
-	logGo = `
-// Package internal Create at {{.CreateTime}}
+	logGo = `// Package internal Create at {{.CreateTime}}
 package internal
 
 import (
@@ -123,15 +121,15 @@ func (hook ContextHook) Levels() []logrus.Level {
 
 // Fire implement fire
 func (hook ContextHook) Fire(entry *logrus.Entry) error {
-	entry.Data[hook.Field] = findCaller(hook.Skip)
+	entry.Data[hook.Field] = hook.findCaller(hook.Skip)
 	return nil
 }
 
-func findCaller(skip int) string {
+func (hook ContextHook) findCaller(skip int) string {
 	file := ""
 	line := 0
 	for i := 0; i < 10; i++ {
-		file, line = getCaller(skip + i)
+		file, line = hook.getCaller(skip + i)
 		if !strings.HasPrefix(file, "logrus") {
 			break
 		}
@@ -139,7 +137,7 @@ func findCaller(skip int) string {
 	return fmt.Sprintf("%s:%d", file, line)
 }
 
-func getCaller(skip int) (string, int) {
+func (hook ContextHook) getCaller(skip int) (string, int) {
 	_, file, line, ok := runtime.Caller(skip)
 	if !ok {
 		return "", 0
@@ -157,8 +155,7 @@ func getCaller(skip int) (string, int) {
 	return file, line
 }
 `
-	configGo = `
-// Package internal Create at {{.CreateTime}}
+	configGo = `// Package internal Create at {{.CreateTime}}
 package internal
 
 import (
@@ -202,14 +199,32 @@ func LoadConfig(path, mode string) (*Config, error) {
 	return &config, nil
 }
 `
-	routerGo = `
-// Package internal Create at {{.CreateTime}}
-package router
+	utilGo = `
+// Package handler Create at {{.CreateTime}}
+package handler
 
 import (
 	"{{.Pkg}}/internal"
 
 	"github.com/go-xorm/xorm"
+	"github.com/sirupsen/logrus"
+)
+
+
+func Engine() *xorm.Engine {
+	return internal.Server().Engine
+}
+
+func Logger() *logrus.Logger {
+	return internal.Logger
+}
+`
+	routerGo = `// Package router Create at {{.CreateTime}}
+package router
+
+import (
+	"{{.Pkg}}/internal"
+
 	"github.com/nekobox69/zephyr"
 	"github.com/sirupsen/logrus"
 )
@@ -218,14 +233,6 @@ var Router = zephyr.NewZephyr(internal.Logger)
 
 func init() {
 	
-}
-
-func Engine() *xorm.Engine {
-	return internal.Server().Engine
-}
-
-func Logger() *logrus.Logger {
-	return internal.Logger
 }
 `
 )
@@ -244,6 +251,10 @@ func InitServer(path, name, pkg string) error {
 		return err
 	}
 	err = createRouter(path, name, pkg)
+	if nil != err {
+		return err
+	}
+	err = createUtil(path, name, pkg)
 	if nil != err {
 		return err
 	}
@@ -365,6 +376,42 @@ func createRouter(path, name, pkg string) error {
 	})
 	if err != nil {
 		color.Red("生产router.go文件失败:%s", err.Error())
+		return err
+	}
+	cmd := exec.Command("goimports", "-w", fileName)
+	err = cmd.Run()
+	if nil != err {
+		color.Yellow("格式化文件%s失败", fileName)
+	}
+	return nil
+}
+
+func createUtil(path, name, pkg string) error {
+	path = filepath.ToSlash(path)
+	err := os.MkdirAll(path+"/"+name+"/internal/handler", os.ModePerm)
+	if nil != err {
+		color.Red("创建handler文件夹失败:%s", err.Error())
+		return err
+	}
+	fileName := path + "/" + name + "/internal/handler/util.go"
+	f, err := os.Create(fileName)
+
+	if err != nil {
+		color.Red("创建util.go失败:%s", err.Error())
+		return err
+	}
+	defer f.Close()
+	t, err := template.New("util.go").Parse(routerGo)
+	if err != nil {
+		color.Red("创建util.go模板失败:%s", err.Error())
+		return err
+	}
+	err = t.Execute(f, map[string]interface{}{
+		"Pkg":        pkg,
+		"CreateTime": time.Now().Format(timeLayout),
+	})
+	if err != nil {
+		color.Red("生产util.go文件失败:%s", err.Error())
 		return err
 	}
 	cmd := exec.Command("goimports", "-w", fileName)
